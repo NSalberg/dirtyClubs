@@ -1,6 +1,7 @@
 
 from random import shuffle
 from typing import Optional
+from typing import Tuple
 SUITS = ["Hearts", "Spades", "Clubs", "Diamonds"]
 
 
@@ -64,30 +65,20 @@ class Game:
             
             self.showPlayersCards()
 
-            dealer = self.round % len(self.players)
-            print("Dealer: " + str(dealer))
+            dealer = self.players[self.round % len(self.players)]
+            dealerIdx = self.players.index(dealer)
+            print("Dealer: " + str(dealer.name))
 
             #players bid 
-            #loop through players starting with left of dealer
-            highestBid = 0
-            highestBidder: Optional[Player] = None
-            for i in range(len(self.players)):
-                player = self.players[(dealer + i + 1 ) % len(self.players)]
-                print(player.name + " bid")
-                bid = int(input())
-                if bid < 0 or bid > 5:
-                    raise Exception("Invalid bid")
-                if(bid > highestBid):
-                    highestBid = bid
-                    highestBidder = player
-                if(highestBid == 5):
-                    break
+            
+            highestbid, highestBidder = self.getHighestBidder(dealerIdx=dealerIdx)
             if highestBidder is not None:
                 print("Highest Bidder: " + highestBidder.name)
+                print(highestBidder.name + " bids " + str(highestbid))
             else:
                 print("No bids, redeal")
                 self.round += 1
-                break
+            
             #select trump
             print(highestBidder.name + " Select trump")
             trump = input()
@@ -96,27 +87,37 @@ class Game:
             
             
             #loop through players starting with left of highest bidder
-            highestBidderIndex = players.index(highestBidder)
-
-            for i in range(len(self.players) -1 ):
-                player = self.players[(highestBidderIndex + i + 1 ) % len(self.players)]
-                print(player.name + " pass or play")
-                passOrPlay = input()
-                if passOrPlay == "pass":
-                    continue
-                elif passOrPlay == "play":
-                    self.playing
-                    self.playing.append(player)
+            highestBidderIndex = self.players.index(highestBidder)
+            self.passOrPlay(highestBidderIndex)
                     
                 
-            #dealer play card
-            print(self.players[dealer].name + " Select card")
-            cardIndex = int(input())
-            if cardIndex < 0 or cardIndex > len(self.players[dealer].hand):
-                raise Exception("Invalid card index")
-            card = self.players[dealer].hand.pop(cardIndex)
+            
+            if (len(self.playing) == 1):
+                # give 5 points to player
+                continue
+
+            for card in dealer.hand:
+                for i in range(len(self.playing)):
+                    player = self.players[(dealerIdx + i + 1 ) % len(self.players)]
+                    for card in player.hand:
+                        card.show()
+                    print(player.name + " Select card index")
+                    #follow suit and shit
+
+                    cardIndex = int(input())
+                    if cardIndex < 0 or cardIndex > len(self.players[dealerIdx].hand):
+                        raise Exception("Invalid card index")
+                # decide winner of trick
+                # winner of hand must play first card next
+                # 
+            
+            
+
+            
+            card = self.players[dealerIdx].hand.pop(cardIndex)
             highestBidder.score += 1
             self.round += 1
+
             #loop through players starting with left of dealer
             #player bid
             
@@ -129,6 +130,37 @@ class Game:
 
             #players play cards
             #players score tricks
+    def getHighestBidder(self, dealerIdx: int) -> Tuple[int, Optional[Player]]:
+        #loop through players starting with left of dealer
+        highestBid = 0
+        highestBidder = None
+        for i in range(len(self.players)):
+            player = self.players[(dealerIdx + i + 1 ) % len(self.players)]
+            print(player.name + " bid")
+            bid = int(input())
+            if bid < 0 or bid > 5:
+                raise Exception("Invalid bid")
+            if(bid > highestBid):
+                highestBid = bid
+                highestBidder = player
+            if(highestBid == 5):
+                highestBid = bid
+                highestBidder = player
+                break
+        return highestBid, highestBidder
+
+
+    def passOrPlay(self, highestBidderIndex):
+        for i in range(len(self.players) -1 ):
+            player = self.players[(highestBidderIndex + i + 1 ) % len(self.players)]
+            print(player.name + " pass or play")
+            passOrPlay = input()
+            if passOrPlay == "pass":
+                continue
+            elif passOrPlay == "play":
+                self.playing
+                self.playing.append(player)
+
     
     def hasPlayerWon(self) -> bool:
         for player in self.players:
