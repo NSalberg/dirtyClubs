@@ -51,6 +51,9 @@ class Game:
         self.deck = deck
         self.round = 0
         self.dealAmount = dealAmount
+        self.suit = ""
+        self.playing: list[Player] = []
+
         if dealAmount * len(players) > len(deck.cards):
             raise Exception("Not enough cards in deck")
         
@@ -72,19 +75,55 @@ class Game:
                 player = self.players[(dealer + i + 1 ) % len(self.players)]
                 print(player.name + " bid")
                 bid = int(input())
+                if bid < 0 or bid > 5:
+                    raise Exception("Invalid bid")
                 if(bid > highestBid):
                     highestBid = bid
                     highestBidder = player
+                if(highestBid == 5):
+                    break
             if highestBidder is not None:
                 print("Highest Bidder: " + highestBidder.name)
             else:
                 print("No bids, redeal")
                 self.round += 1
                 break
+            #select trump
+            print(highestBidder.name + " Select trump")
+            trump = input()
+            if trump not in SUITS:
+                raise Exception("Invalid suit")
+            
+            
+            #loop through players starting with left of highest bidder
+            highestBidderIndex = players.index(highestBidder)
+
+            for i in range(len(self.players) -1 ):
+                player = self.players[(highestBidderIndex + i + 1 ) % len(self.players)]
+                print(player.name + " pass or play")
+                passOrPlay = input()
+                if passOrPlay == "pass":
+                    continue
+                elif passOrPlay == "play":
+                    self.playing
+                    self.playing.append(player)
+                    
+                
+            #dealer play card
+            print(self.players[dealer].name + " Select card")
+            cardIndex = int(input())
+            if cardIndex < 0 or cardIndex > len(self.players[dealer].hand):
+                raise Exception("Invalid card index")
+            card = self.players[dealer].hand.pop(cardIndex)
+            highestBidder.score += 1
+            self.round += 1
+            #loop through players starting with left of dealer
+            #player bid
             
 
-            #player bid
+        
             #player play card
+
             #player score trick
 
 
