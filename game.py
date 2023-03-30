@@ -21,6 +21,7 @@ class Deck:
         self.build(range = range)
         self.shuffle()
 
+
         
     def build(self, range: list[int]):
         for n in range:
@@ -48,6 +49,11 @@ class Player:
 
 class Game:
     def __init__(self, players: list[Player], deck: Deck = Deck(), dealAmount: int = 0) -> None:
+        """
+        players: list of players
+        deck: deck of cards
+        dealAmount: amount of cards to deal to each player
+        """
         self.players = players
         self.deck = deck
         self.round = 0
@@ -72,6 +78,7 @@ class Game:
             #players bid 
             
             highestbid, highestBidder = self.getHighestBidder(dealerIdx=dealerIdx)
+            
             if highestBidder is not None:
                 print("Highest Bidder: " + highestBidder.name)
                 print(highestBidder.name + " bids " + str(highestbid))
@@ -86,7 +93,6 @@ class Game:
                 raise Exception("Invalid suit")
             
             
-            #loop through players starting with left of highest bidder
             highestBidderIndex = self.players.index(highestBidder)
             self.passOrPlay(highestBidderIndex)
                     
@@ -172,6 +178,7 @@ class Game:
         for player in self.players:
             for _ in range(self.dealAmount):
                 player.hand.append(self.deck.draw())
+
     def showPlayersCards(self) -> None:
         for player in self.players:
             print(player.name)
