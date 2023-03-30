@@ -45,6 +45,11 @@ class Player:
         self.name = name
         self.hand = []
         self.score: int = 0
+
+    def __eq__(self, player: object) -> bool:
+        if isinstance(player, Player):
+            return self.name == player.name
+        return False
         
 
 class Game:
@@ -85,8 +90,10 @@ class Game:
             else:
                 print("No bids, redeal")
                 self.round += 1
+                continue
             
             #select trump
+            assert highestBidder is not None
             print(highestBidder.name + " Select trump")
             trump = input()
             if trump not in SUITS:
@@ -101,7 +108,10 @@ class Game:
             if (len(self.playing) == 1):
                 # give 5 points to player
                 continue
+            
 
+            #players play cards
+            cardIndex = -1
             for card in dealer.hand:
                 for i in range(len(self.playing)):
                     player = self.players[(dealerIdx + i + 1 ) % len(self.players)]
@@ -117,8 +127,6 @@ class Game:
                 # winner of hand must play first card next
                 # 
             
-            
-
             
             card = self.players[dealerIdx].hand.pop(cardIndex)
             highestBidder.score += 1
