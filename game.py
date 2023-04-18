@@ -1,59 +1,12 @@
-
-from random import shuffle
+from turn import Turn
 from typing import Optional
 from typing import Tuple
-SUITS = ["Hearts", "Spades", "Clubs", "Diamonds"]
-
-
-class Card:
-    def __init__(self, suit: str, number: int) -> None:
-        self.suit = suit
-        self.number = number
-
-    def show(self) -> None:
-        print("{} of {}".format(self.number, self.suit))
-
-
-class Deck:
-    def __init__(self, range: list[int] = list(range(1,14)) ) -> None:
-        self.cards = []
-        self.range = range
-        self.build(range = range)
-        self.shuffle()
-
-
-        
-    def build(self, range: list[int]):
-        for n in range:
-            for s in SUITS:
-                self.cards.append(Card(s,n))
+from cards import Deck, SUITS
+from players import Player
+from utils import block_print
     
-    def draw(self) -> Card:
-        return self.cards.pop()
-    
-    def show(self) -> None:
-        for card in self.cards:
-            card.show()
-
-    def shuffle(self) -> None:
-        shuffle(self.cards)
-    
-
-
-class Player:
-    def __init__(self, name: str) -> None:
-        self.name = name
-        self.hand = []
-        self.score: int = 0
-
-    def __eq__(self, player: object) -> bool:
-        if isinstance(player, Player):
-            return self.name == player.name
-        return False
-        
-
 class Game:
-    def __init__(self, players: list[Player], deck: Deck = Deck(), dealAmount: int = 0) -> None:
+    def __init__(self, players: list[Player], deck: Deck = Deck(), dealAmount: int = 0, comment : bool = False) -> None:
         """
         players: list of players
         deck: deck of cards
@@ -61,13 +14,21 @@ class Game:
         """
         self.players = players
         self.deck = deck
-        self.round = 0
         self.dealAmount = dealAmount
+
+        self.turn = Turn(
+            deck=self.deck,
+            players=self.players,
+            agent=None,
+            dealAmount = self.dealAmount
+        )
+        
+        self.round = 0
         self.suit = ""
         self.playing: list[Player] = []
 
-        if dealAmount * len(players) > len(deck.cards):
-            raise Exception("Not enough cards in deck")
+        if comment == False: block_print()
+        
         
     def play(self) -> None:
         while self.hasPlayerWon:
