@@ -1,110 +1,85 @@
 from turn import Turn
 from typing import Optional
 from typing import Tuple
-from cards import Deck, SUITS
+from cards import Deck, SUITS, Card
 from players import Player
 from utils import block_print
-    
-class Game:
-    def __init__(self, players: list[Player], deck: Deck = Deck(), dealAmount: int = 0, comment : bool = False) -> None:
+import copy
+
+class ClubsEngine:
+    def __init__(self, num_players: int, deck: Deck = Deck(), dealAmount: int = 0, comment : bool = False) -> None:
         """
         players: list of players
         deck: deck of cards
         dealAmount: amount of cards to deal to each player
         """
-        self.players = players
-        self.deck = deck
+        self.players = list[Player]()
+        self.num_players = num_players
+        self.full_deck = deck
+        self.deck = Deck()
         self.dealAmount = dealAmount
-
+        """
         self.turn = Turn(
             deck=self.deck,
             players=self.players,
             agent=None,
             dealAmount = self.dealAmount
         )
-        
+        """
+        self.player_scores = [0,0,0,0]
         self.round = 0
-        self.suit = ""
+        self.trump = ""
         self.playing: list[Player] = []
-
+    
         if comment == False: block_print()
         
         
-    def play(self) -> None:
+    def play(self) -> list[int]:
         while self.hasPlayerWon:
-            
-            self.deal()
-            
-            self.showPlayersCards()
-
-            dealer = self.players[self.round % len(self.players)]
-            dealerIdx = self.players.index(dealer)
-            print("Dealer: " + str(dealer.name))
-
-            #players bid 
-            
-            highestbid, highestBidder = self.getHighestBidder(dealerIdx=dealerIdx)
-            
-            if highestBidder is not None:
-                print("Highest Bidder: " + highestBidder.name)
-                print(highestBidder.name + " bids " + str(highestbid))
-            else:
-                print("No bids, redeal")
-                self.round += 1
-                continue
-            
-            #select trump
-            assert highestBidder is not None
-            print(highestBidder.name + " Select trump")
-            trump = input()
-            if trump not in SUITS:
-                raise Exception("Invalid suit")
-            
-            
-            highestBidderIndex = self.players.index(highestBidder)
-            self.passOrPlay(highestBidderIndex)
-                    
-                
-            
-            if (len(self.playing) == 1):
-                # give 5 points to player
-                continue
-            
-
-            #players play cards
-            cardIndex = -1
-            for card in dealer.hand:
-                for i in range(len(self.playing)):
-                    player = self.players[(dealerIdx + i + 1 ) % len(self.players)]
-                    for card in player.hand:
-                        card.show()
-                    print(player.name + " Select card index")
-                    #follow suit and shit
-
-                    cardIndex = int(input())
-                    if cardIndex < 0 or cardIndex > len(self.players[dealerIdx].hand):
-                        raise Exception("Invalid card index")
-                # decide winner of trick
-                # winner of hand must play first card next
-                # 
-            
-            
-            card = self.players[dealerIdx].hand.pop(cardIndex)
-            highestBidder.score += 1
+            self.deck = copy.deepcopy(self.full_deck)
+            start_player = self.players[0]
+            while self.players[0].hand != []:
+                start_player = self.trick(start_player)
+            print(self.player_scores)
             self.round += 1
-
-            #loop through players starting with left of dealer
-            #player bid
+            
+        return self.player_scores
             
 
+    # TODO: implement trump suit 
+    def trick(self, starting_player: Player) -> Player:
+        print(f"Trick starting with : {starting_player.name}")
+        starting_player_idx = self.players.index(starting_player)
+        cards_played = list[Tuple[Player,Card]]()
+
+        for i in range(len(self.players)):
+            player = self.players[(starting_player_idx + i) % len(self.players)]
+            card_played = player.play_random(lead_card=None)
+            print(f"{player.name} played {card_played}")
+            cards_played.append((player, card_played))
+            # is not removing card from hand
+            # notify all agents of a move 
+            for notified_player in self.players:
+                notified_player.observeActionTaken(player, card_played)
+        # find winner of trick
+        winner = self.find_winner(cards_played)
+        print(f"Winner of trick: {winner.name}\n")
+        self.player_scores[self.players.index(winner)] += 1
+        return winner
+
+    def find_winner(self, cards_played: list[Tuple[Player,Card]]) -> Player:
+        # find highest card of lead suit or trump
         
-            #player play card
+        highest_card = cards_played[0][1]
+        lead = highest_card.suit
+        winner = cards_played[0][0]
+        for player, card in cards_played:
+            if card.suit == lead:
+                if card.number > highest_card.number:
+                    highest_card = card
+                    winner = player
+        return winner
 
-            #player score trick
-
-
-            #players play cards
-            #players score tricks
     def getHighestBidder(self, dealerIdx: int) -> Tuple[int, Optional[Player]]:
         #loop through players starting with left of dealer
         highestBid = 0
@@ -138,15 +113,19 @@ class Game:
 
     
     def hasPlayerWon(self) -> bool:
-        for player in self.players:
-            if player.score >= 15:
-                return True
+        if any(score >= 15 for score in self.player_scores):
+            return True
         return False
     
     def deal(self) -> None:
-        for player in self.players:
+        self.deck.shuffle()
+        self.players = []
+        for i in range(num_players):
+            hand = []
             for _ in range(self.dealAmount):
-                player.hand.append(self.deck.draw())
+                hand.append(self.deck.draw())
+            self.players.append(Player("Player " + str(i+1), hand))
+        self.showPlayersCards()
 
     def showPlayersCards(self) -> None:
         for player in self.players:
@@ -157,8 +136,8 @@ class Game:
 
 if __name__ == "__main__":
     deck = Deck([1,9,10,11,12,13])
-    players = [Player("Player 1"), Player("Player 2"), Player("Player 3"), Player("Player 4")]
-    game = Game(players, deck, 5)
+    num_players = 4
+    game = ClubsEngine(num_players, deck, 5, True)
     game.play()
 
     

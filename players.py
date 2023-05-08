@@ -1,22 +1,46 @@
+from collections import defaultdict
 from cards import Card, Deck
 from typing import Optional, List, Tuple
+import random
+
 class Player:
-    def __init__(self, name: str) -> None:
+    def __init__(self, name: str, hand) -> None:
         self.name = name
-        self.hand = list[Card]()
+        self.hand = hand
         self.hand_playable = list[Card]()
         self.score: int = 0
-        self.deck = []
+        self.in_play = list[Card]()
+        self.card_map = defaultdict(list)
+        for card in hand:
+            self.card_map[card.suit].append(card)
+        
 
+    
+    
+    def play_random(self, lead_card: Optional[Card]) -> Card:
+        """
+        Plays a random card from the hand_playable
+        lead_card: card that was played first if it is the first card in the trick lead_card is None
+        """
+        self.find_playable(lead_card)
+        played_card = random.choice(self.hand_playable)
+        self.hand.remove(played_card)
+        return played_card
+    
+    def observeActionTaken(self, player, card: Card) -> None:
+        if player == self:
+            self.card_map[card.suit].remove(card)
+        self.in_play.append(card) 
 
-        self.state = []
-        self.actions = []
-        self.action = 0
+        #TODO: this should only happen when the trick is over change 4 to however many players there are
+        if len(self.in_play) == 4:
+            self.in_play.clear()
+            self.lead_card = None
         
     def find_playable(self, lead_card: Optional[Card]) -> List[Card]:
         """
         Looks at hand and finds playable cards, then adds them to hand_play
-        lead_card: card that was played first if first card in trick lead_card is None
+        lead_card: card that was played first if it is the first card in the trick lead_card is None
         """
         
         self.hand_playable = list[Card]()
@@ -37,17 +61,6 @@ class Player:
                     self.hand_playable.append(card)
         return self.hand_playable
 
-    def identify_state(self, deck: Deck) -> None:
-        """
-        Identifies the state of the player
-        """
-        #state = [lead_card, hand_playable, hand, score]
-        # [self.hand_playable, self.hand, self.score] in future ?
-        for card in deck.cards:
-            if card in self.hand_playable:
-                self.state.append(1)
-            else:
-                self.state.append(0)
     def has_suit(self, leadsuit: str) -> bool:
         for card in self.hand:
             if card.suit == leadsuit:
