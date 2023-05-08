@@ -35,8 +35,9 @@ class ClubsEngine:
         
         
     def play(self) -> list[int]:
-        while self.hasPlayerWon:
+        while self.hasPlayerWon():
             self.deck = copy.deepcopy(self.full_deck)
+            self.deal()
             start_player = self.players[0]
             while self.players[0].hand != []:
                 start_player = self.trick(start_player)
@@ -113,9 +114,10 @@ class ClubsEngine:
 
     
     def hasPlayerWon(self) -> bool:
+        #check if any player has 15 points or more
         if any(score >= 15 for score in self.player_scores):
-            return True
-        return False
+            return False
+        return True
     
     def deal(self) -> None:
         self.deck.shuffle()
