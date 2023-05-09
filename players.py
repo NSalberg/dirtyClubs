@@ -16,18 +16,34 @@ class Player(ABC):
         for card in hand:
             self.card_map[card.suit].append(card)    
     
+    """
+    @param lead_card: card that was played first if it is the first card in the trick lead_card is None
+    @return: card that was played
+    """
     @abstractmethod
-    def play_random(self, lead_card: Optional[Card]) -> Card:
+    def play_card(self, lead_card: Optional[Card]) -> Card:
         """
-        Plays a random card from the hand_playable
-        lead_card: card that was played first if it is the first card in the trick lead_card is None
+        play_card is called by the game engine to get the card that the player wants to play
+        
+        :param lead_card: card that was played first if it is the first card in the trick lead_card is None
         """
         self.find_playable(lead_card)
         played_card = random.choice(self.hand_playable)
         self.hand.remove(played_card)
         return played_card
+    
+    """
+    @param player: player that played the card
+    @param card: card that was played
+    """
     @abstractmethod
     def observeActionTaken(self, player, card: Card) -> None:
+        """
+        observeActionTaken is called by the game engine to notify the player of a move
+        
+        :param player: player that played the card
+        :param card: card that was played
+        """
         if player == self:
             self.card_map[card.suit].remove(card)
         self.in_play.append(card) 
@@ -36,11 +52,13 @@ class Player(ABC):
         if len(self.in_play) == 4:
             self.in_play.clear()
             self.lead_card = None
-        
+    
+    
     def find_playable(self, lead_card: Optional[Card]) -> List[Card]:
         """
-        Looks at hand and finds playable cards, then adds them to hand_play
-        lead_card: card that was played first if it is the first card in the trick lead_card is None
+        find_playable looks at the players hand and finds playable cards, then adds them to hand_play
+        
+        :param lead_card: card that was played first if it is the first card in the trick lead_card is None
         """
         
         self.hand_playable = list[Card]()
@@ -88,9 +106,10 @@ class Player_Random(Player):
         for card in hand:
             self.card_map[card.suit].append(card)    
     
-    def play_random(self, lead_card: Optional[Card]) -> Card:
+    def play_card(self, lead_card: Optional[Card]) -> Card:
         """
-        Plays a random card from the hand_playable
+        play_card plays a random card from the hand_playable
+        
         lead_card: card that was played first if it is the first card in the trick lead_card is None
         """
         self.find_playable(lead_card)
@@ -108,41 +127,3 @@ class Player_Random(Player):
             self.in_play.clear()
             self.lead_card = None
         
-    def find_playable(self, lead_card: Optional[Card]) -> List[Card]:
-        """
-        Looks at hand and finds playable cards, then adds them to hand_play
-        lead_card: card that was played first if it is the first card in the trick lead_card is None
-        """
-        
-        self.hand_playable = list[Card]()
-        # add jack of opposite suit to playable
-
-        #if lead_card is None or player does not have suit of lead_card add all cards to playable
-        if lead_card is None or not self.has_suit(lead_card.suit):
-            for card in self.hand:
-                self.hand_playable.append(card)
-        else:
-            #if player has suit of lead_card add all cards of that suit to playable
-            for card in self.hand:
-                if  card.suit == lead_card.suit:
-                    self.hand_playable.append(card)
-                elif (lead_card.suit == "Hearts" or lead_card.suit == "Diamonds") and (card.number == 11 and (card.suit == "Hearts" or card.suit == "Diamonds")):
-                    self.hand_playable.append(card)
-                elif (lead_card.suit == "Clubs" or lead_card.suit == "Spades") and (card.number == 11 and (card.suit == "Clubs" or card.suit == "Spades")):
-                    self.hand_playable.append(card)
-        return self.hand_playable
-
-    def has_suit(self, leadsuit: str) -> bool:
-        for card in self.hand:
-            if card.suit == leadsuit:
-                return True
-            if (leadsuit == "Hearts" or leadsuit == "Diamonds") and (card.number == 11 and (card.suit == "Hearts" or card.suit == "Diamonds")):
-                return True
-            if (leadsuit == "Spades" or leadsuit == "Clubs") and (card.number == 11 and (card.suit == "Clubs" or card.suit == "Spades")):
-                return True
-        return False
-
-    def __eq__(self, player: object) -> bool:
-        if isinstance(player, Player):
-            return self.name == player.name
-        return False
