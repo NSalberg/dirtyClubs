@@ -2,7 +2,7 @@ from turn import Turn
 from typing import Optional
 from typing import Tuple
 from cards import Deck, SUITS, Card
-from players import Player
+from players import Player, Player_Random
 from utils import block_print
 import copy
 
@@ -38,7 +38,8 @@ class ClubsEngine:
         while self.hasPlayerWon():
             self.deck = copy.deepcopy(self.full_deck)
             self.deal()
-            start_player = self.players[0]
+            dealerIdx = self.round % len(self.players)
+            start_player = self.players[dealerIdx]
             while self.players[0].hand != []:
                 start_player = self.trick(start_player)
             print(self.player_scores)
@@ -55,10 +56,16 @@ class ClubsEngine:
 
         for i in range(len(self.players)):
             player = self.players[(starting_player_idx + i) % len(self.players)]
-            card_played = player.play_random(lead_card=None)
+            #change lead card to first card played
+            if i == 0:
+                card_played = player.play_random(lead_card=None)
+                self.lead_card = card_played
+            else:
+                card_played = player.play_random(lead_card=self.lead_card)
+            
             print(f"{player.name} played {card_played}")
             cards_played.append((player, card_played))
-            # is not removing card from hand
+
             # notify all agents of a move 
             for notified_player in self.players:
                 notified_player.observeActionTaken(player, card_played)
@@ -68,6 +75,7 @@ class ClubsEngine:
         self.player_scores[self.players.index(winner)] += 1
         return winner
 
+    # TODO: fully implement 
     def find_winner(self, cards_played: list[Tuple[Player,Card]]) -> Player:
         # find highest card of lead suit or trump
         
@@ -126,7 +134,7 @@ class ClubsEngine:
             hand = []
             for _ in range(self.dealAmount):
                 hand.append(self.deck.draw())
-            self.players.append(Player("Player " + str(i+1), hand))
+            self.players.append(Player_Random("Player " + str(i+1), hand))
         self.showPlayersCards()
 
     def showPlayersCards(self) -> None:
