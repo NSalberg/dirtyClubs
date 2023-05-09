@@ -1,7 +1,21 @@
 from random import shuffle
-SUITS = ["Hearts", "Spades", "Clubs", "Diamonds"]
+from enum import Enum
+
+class Suit(Enum):
+    HEARTS = 1
+    SPADES = 2
+    CLUBS = 3
+    DIAMONDS = 4
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, Suit):
+            return self.value == other.value
+        return False
+    def __hash__(self) -> int:
+        return self.value
+    def __str__(self) -> str:
+        return self.name.lower()
 class Card:
-    def __init__(self, suit: str, number: int) -> None:
+    def __init__(self, suit: Suit, number: int) -> None:
         self.suit = suit
         self.number = number
 
@@ -28,16 +42,14 @@ class Card:
 
 class Deck:
     def __init__(self, range: list[int] = list(range(1,14)) ) -> None:
-        self.cards = []
+        self.cards = list[Card]()
         self.range = range
         self.build(range = range)
         self.shuffle()
 
-
-        
     def build(self, range: list[int]):
         for n in range:
-            for s in SUITS:
+            for s in Suit:
                 self.cards.append(Card(s,n))
     
     def draw(self) -> Card:

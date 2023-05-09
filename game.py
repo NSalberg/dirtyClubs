@@ -1,7 +1,6 @@
-from turn import Turn
 from typing import Optional
 from typing import Tuple
-from cards import Deck, SUITS, Card
+from cards import Deck, Suit, Card
 from players import Player, Player_Random
 from utils import block_print
 import copy
@@ -58,10 +57,10 @@ class ClubsEngine:
             player = self.players[(starting_player_idx + i) % len(self.players)]
             #change lead card to first card played
             if i == 0:
-                card_played = player.play_random(lead_card=None)
+                card_played = player.play_card(lead_card=None)
                 self.lead_card = card_played
             else:
-                card_played = player.play_random(lead_card=self.lead_card)
+                card_played = player.play_card(lead_card=self.lead_card)
             
             print(f"{player.name} played {card_played}")
             cards_played.append((player, card_played))

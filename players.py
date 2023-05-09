@@ -1,5 +1,5 @@
 from collections import defaultdict
-from cards import Card, Deck
+from cards import Card, Deck, Suit
 from typing import Optional, List, Tuple
 import random
 from abc import abstractmethod, ABC
@@ -73,19 +73,19 @@ class Player(ABC):
             for card in self.hand:
                 if  card.suit == lead_card.suit:
                     self.hand_playable.append(card)
-                elif (lead_card.suit == "Hearts" or lead_card.suit == "Diamonds") and (card.number == 11 and (card.suit == "Hearts" or card.suit == "Diamonds")):
+                elif (lead_card.suit == Suit.HEARTS or lead_card.suit == Suit.DIAMONDS) and (card.number == 11 and (card.suit == Suit.HEARTS or card.suit == Suit.DIAMONDS)):
                     self.hand_playable.append(card)
-                elif (lead_card.suit == "Clubs" or lead_card.suit == "Spades") and (card.number == 11 and (card.suit == "Clubs" or card.suit == "Spades")):
+                elif (lead_card.suit == Suit.CLUBS or lead_card.suit == Suit.SPADES) and (card.number == 11 and (card.suit == Suit.CLUBS or card.suit == Suit.SPADES)):
                     self.hand_playable.append(card)
         return self.hand_playable
 
-    def has_suit(self, leadsuit: str) -> bool:
+    def has_suit(self, leadsuit: Suit) -> bool:
         for card in self.hand:
             if card.suit == leadsuit:
                 return True
-            if (leadsuit == "Hearts" or leadsuit == "Diamonds") and (card.number == 11 and (card.suit == "Hearts" or card.suit == "Diamonds")):
+            if (leadsuit == Suit.HEARTS or leadsuit == Suit.DIAMONDS) and (card.number == 11 and (card.suit == Suit.HEARTS or card.suit == Suit.DIAMONDS)):
                 return True
-            if (leadsuit == "Spades" or leadsuit == "Clubs") and (card.number == 11 and (card.suit == "Clubs" or card.suit == "Spades")):
+            if (leadsuit == Suit.SPADES or leadsuit == Suit.CLUBS) and (card.number == 11 and (card.suit == Suit.CLUBS or card.suit == Suit.SPADES)):
                 return True
         return False
 
