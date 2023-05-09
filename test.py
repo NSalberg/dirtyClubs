@@ -23,7 +23,6 @@ class TestCard(unittest.TestCase):
         self.assertNotEqual(card1, card2)
 
 
-
 class TestDeck(unittest.TestCase):
     def test_deck_size(self):
         deck = Deck()
@@ -46,20 +45,22 @@ class TestDeck(unittest.TestCase):
         self.assertEqual(len(deck.cards), 12)
 
 class TestPlayer(unittest.TestCase):
+    test_cards = [Card(Suit.HEARTS, 1), Card(Suit.HEARTS, 9), Card(Suit.HEARTS, 10), Card(Suit.HEARTS, 11), Card(Suit.SPADES, 10)]
+    
     def test_player_hand(self):
         player = Player_Random("Bob", [])
         self.assertEqual(len(player.hand), 0)
 
     def test_playable_none(self):
-        cards = [Card(Suit.HEARTS, 1), Card(Suit.HEARTS, 9), Card(Suit.HEARTS, 10), Card(Suit.HEARTS, 11), Card(Suit.SPADES, 10)]
+        cards = self.test_cards 
         player = Player_Random("Bob", cards)
         player.hand = cards
-        playable_cards = [Card(Suit.HEARTS, 1), Card(Suit.HEARTS, 9), Card(Suit.HEARTS, 10), Card(Suit.HEARTS, 11), Card(Suit.SPADES, 10)]
+        playable_cards = self.test_cards 
         find_playable_cards = player.find_playable(lead_card=None)
         self.assertEqual(playable_cards, find_playable_cards)
 
     def test_playable_hearts(self):
-        cards = [Card(Suit.HEARTS, 1), Card(Suit.HEARTS, 9), Card(Suit.HEARTS, 10), Card(Suit.HEARTS, 11), Card(Suit.SPADES, 10)]
+        cards = self.test_cards 
         player = Player_Random("Bob", cards)
         player.hand = cards
         playable_cards = [Card(Suit.HEARTS, 1), Card(Suit.HEARTS, 9), Card(Suit.HEARTS, 10), Card(Suit.HEARTS, 11)]
@@ -67,7 +68,7 @@ class TestPlayer(unittest.TestCase):
         self.assertEqual(playable_cards, find_playable_cards)
 
     def test_playable_spades(self):
-        cards = [Card(Suit.HEARTS, 1), Card(Suit.HEARTS, 9), Card(Suit.HEARTS, 10), Card(Suit.HEARTS, 11), Card(Suit.SPADES, 10)]
+        cards = self.test_cards 
         player = Player_Random("Bob", cards)
         player.hand = cards
         playable_cards = [Card(Suit.SPADES, 10)]
@@ -75,10 +76,10 @@ class TestPlayer(unittest.TestCase):
         self.assertEqual(playable_cards, find_playable_cards)
 
     def test_playable_clubs(self):
-        cards = [Card(Suit.HEARTS, 1), Card(Suit.HEARTS, 9), Card(Suit.HEARTS, 10), Card(Suit.HEARTS, 11), Card(Suit.SPADES, 10)]
+        cards = self.test_cards 
         player = Player_Random("Bob", cards)
         player.hand = cards
-        playable_cards = [Card(Suit.HEARTS, 1), Card(Suit.HEARTS, 9), Card(Suit.HEARTS, 10), Card(Suit.HEARTS, 11), Card(Suit.SPADES, 10)]
+        playable_cards = self.test_cards 
         find_playable_cards = player.find_playable(lead_card=Card(Suit.CLUBS, 1))
         self.assertEqual(playable_cards, find_playable_cards)
 
