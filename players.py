@@ -54,7 +54,7 @@ class Player(ABC):
             self.lead_card = None
     
     
-    def find_playable(self, lead_card: Optional[Card]) -> List[Card]:
+    def find_playable(self, lead_card: Optional[Card], trump_suit: Suit) -> List[Card]:
         """
         find_playable looks at the players hand and finds playable cards, then adds them to hand_play
         
@@ -63,29 +63,37 @@ class Player(ABC):
         
         self.hand_playable = list[Card]()
         # add jack of opposite suit to playable
-
-        #if lead_card is None or player does not have suit of lead_card add all cards to playable
-        if lead_card is None or not self.has_suit(lead_card.suit):
+        if lead_card is None:
             for card in self.hand:
                 self.hand_playable.append(card)
-        else:
-            #if player has suit of lead_card add all cards of that suit to playable
+            return self.hand_playable
+        
+        #if lead card is a jack of opposite suit of trump lead suit is actually trump suit
+        if lead_card.suit == trump_suit.opposite_suit_same_color() and lead_card.number == 11:
+            lead_card.suit = trump_suit
+
+        for card in self.hand:
+            if card.suit == lead_card.suit and not (card.number == 11 and (card.suit == trump_suit or card.suit == trump_suit.opposite_suit_same_color())):
+                self.hand_playable.append(card)
+            elif lead_card.suit == trump_suit and (card.number == 11 and (card.suit == trump_suit or card.suit == trump_suit.opposite_suit_same_color())):
+                self.hand_playable.append(card)
+                
+
+
+        #if no playable cards add all cards to playable
+        if not len(self.hand_playable):
             for card in self.hand:
-                if  card.suit == lead_card.suit:
-                    self.hand_playable.append(card)
-                elif (lead_card.suit == Suit.HEARTS or lead_card.suit == Suit.DIAMONDS) and (card.number == 11 and (card.suit == Suit.HEARTS or card.suit == Suit.DIAMONDS)):
-                    self.hand_playable.append(card)
-                elif (lead_card.suit == Suit.CLUBS or lead_card.suit == Suit.SPADES) and (card.number == 11 and (card.suit == Suit.CLUBS or card.suit == Suit.SPADES)):
-                    self.hand_playable.append(card)
+                self.hand_playable.append(card)
+
         return self.hand_playable
 
-    def has_suit(self, leadsuit: Suit) -> bool:
+    def has_suit(self, leadsuit: Suit, trump_suit) -> bool:
         for card in self.hand:
-            if card.suit == leadsuit:
+            if card.suit == leadsuit and not (card.number == 11 and card.suit == trump_suit):
                 return True
-            if (leadsuit == Suit.HEARTS or leadsuit == Suit.DIAMONDS) and (card.number == 11 and (card.suit == Suit.HEARTS or card.suit == Suit.DIAMONDS)):
+            if (trump_suit == Suit.HEARTS or trump_suit == Suit.DIAMONDS) and (card.number == 11 and (card.suit == Suit.HEARTS or card.suit == Suit.DIAMONDS)):
                 return True
-            if (leadsuit == Suit.SPADES or leadsuit == Suit.CLUBS) and (card.number == 11 and (card.suit == Suit.CLUBS or card.suit == Suit.SPADES)):
+            if (trump_suit == Suit.SPADES or trump_suit == Suit.CLUBS) and (card.number == 11 and (card.suit == Suit.CLUBS or card.suit == Suit.SPADES)):
                 return True
         return False
 

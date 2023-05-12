@@ -46,7 +46,6 @@ class TestDeck(unittest.TestCase):
 
 class TestPlayer(unittest.TestCase):
     test_cards = [Card(Suit.HEARTS, 1), Card(Suit.HEARTS, 9), Card(Suit.HEARTS, 10), Card(Suit.HEARTS, 11), Card(Suit.SPADES, 10)]
-    
     def test_player_hand(self):
         player = Player_Random("Bob", [])
         self.assertEqual(len(player.hand), 0)
@@ -54,42 +53,51 @@ class TestPlayer(unittest.TestCase):
     def test_playable_none(self):
         cards = self.test_cards 
         player = Player_Random("Bob", cards)
-        player.hand = cards
         playable_cards = self.test_cards 
-        find_playable_cards = player.find_playable(lead_card=None)
+        find_playable_cards = player.find_playable(lead_card=None, trump_suit=Suit.CLUBS)
         self.assertEqual(playable_cards, find_playable_cards)
 
     def test_playable_hearts(self):
         cards = self.test_cards 
         player = Player_Random("Bob", cards)
-        player.hand = cards
         playable_cards = [Card(Suit.HEARTS, 1), Card(Suit.HEARTS, 9), Card(Suit.HEARTS, 10), Card(Suit.HEARTS, 11)]
-        find_playable_cards = player.find_playable(lead_card=Card(Suit.HEARTS, 1))
+        find_playable_cards = player.find_playable(lead_card=Card(Suit.HEARTS, 1), trump_suit=Suit.CLUBS)
         self.assertEqual(playable_cards, find_playable_cards)
 
     def test_playable_spades(self):
         cards = self.test_cards 
         player = Player_Random("Bob", cards)
-        player.hand = cards
         playable_cards = [Card(Suit.SPADES, 10)]
-        find_playable_cards = player.find_playable(lead_card=Card(Suit.SPADES, 1))
+        find_playable_cards = player.find_playable(lead_card=Card(Suit.SPADES, 1), trump_suit=Suit.CLUBS)
         self.assertEqual(playable_cards, find_playable_cards)
 
     def test_playable_clubs(self):
         cards = self.test_cards 
         player = Player_Random("Bob", cards)
-        player.hand = cards
         playable_cards = self.test_cards 
-        find_playable_cards = player.find_playable(lead_card=Card(Suit.CLUBS, 1))
+        find_playable_cards = player.find_playable(lead_card=Card(Suit.CLUBS, 1), trump_suit=Suit.CLUBS)
+        self.assertEqual(playable_cards, find_playable_cards)
+
+    def test_playable_trump(self):
+        cards = [Card(Suit.SPADES, 12), Card(Suit.SPADES, 10), Card(Suit.SPADES, 13), Card(Suit.SPADES, 11), Card(Suit.CLUBS, 9)]
+        player = Player_Random("Bob", cards)
+        playable_cards = [Card(Suit.SPADES, 12), Card(Suit.SPADES, 10), Card(Suit.SPADES, 13)]
+        find_playable_cards = player.find_playable(lead_card=Card(Suit.SPADES, 14), trump_suit=Suit.CLUBS)
+        self.assertEqual(playable_cards, find_playable_cards)
+
+    def test_playable_opposite_jack_lead_card(self):
+        cards = [Card(Suit.CLUBS, 13), Card(Suit.CLUBS, 10), Card(Suit.CLUBS, 12), Card(Suit.HEARTS, 9), Card(Suit.DIAMONDS, 12)]
+        player = Player_Random("Bob", cards)
+        playable_cards = [Card(Suit.DIAMONDS, 12)]
+        find_playable_cards = player.find_playable(lead_card=Card(Suit.HEARTS, 11), trump_suit=Suit.DIAMONDS)
         self.assertEqual(playable_cards, find_playable_cards)
 
     def test_playable_opposite_color_jack(self):
-        cards = [Card(Suit.HEARTS, 1), Card(Suit.HEARTS, 9), Card(Suit.HEARTS, 10), Card(Suit.HEARTS, 11), Card(Suit.SPADES, 11)]
+        cards = [Card(Suit.SPADES, 12), Card(Suit.SPADES, 10), Card(Suit.SPADES, 13), Card(Suit.SPADES, 11), Card(Suit.CLUBS, 11)]
         player = Player_Random("Bob", cards)
-        playable_cards = [Card(Suit.SPADES, 11)]
-        find_playable_cards = player.find_playable(lead_card=Card(Suit.CLUBS, 1))
+        playable_cards = [Card(Suit.SPADES, 11), Card(Suit.CLUBS, 11)]
+        find_playable_cards = player.find_playable(lead_card=Card(Suit.CLUBS, 11), trump_suit=Suit.CLUBS)
         self.assertEqual(playable_cards, find_playable_cards)
-
 class TestGame(unittest.TestCase):
     deck = Deck([9,10,11,12,13,14])
     num_players = 4
