@@ -114,6 +114,9 @@ class TestGame(unittest.TestCase):
     def test_find_winner_trump_opposite_jack(self):
         in_play = [Card(Suit.HEARTS, 14), Card(Suit.SPADES, 11), Card(Suit.HEARTS, 10), Card(Suit.HEARTS, 11)]
         self.assertEqual(self.game.find_winner(in_play, Suit.CLUBS), 1 )
+    def test_find_winner(self):
+        in_play = [Card(Suit.SPADES, 13), Card(Suit.SPADES, 10), Card(Suit.HEARTS, 14), Card(Suit.SPADES, 11)]
+        self.assertEqual(self.game.find_winner(in_play, Suit.CLUBS), 3 )
     
 def run_tests():
     test_suite = unittest.TestSuite()

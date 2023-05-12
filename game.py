@@ -16,17 +16,10 @@ class ClubsEngine:
         self.full_deck = deck
         self.deck = Deck()
         self.dealAmount = dealAmount
-        """
-        self.turn = Turn(
-            deck=self.deck,
-            players=self.players,
-            agent=None,
-            dealAmount = self.dealAmount
-        )
-        """
+
         self.player_scores = [0,0,0,0]
         self.round = 0
-        self.trump = ""
+        self.trump = Suit.CLUBS
         self.playing: list[Player] = []
     
         if comment == False: block_print()
@@ -50,10 +43,12 @@ class ClubsEngine:
     def trick(self, starting_player: Player) -> Player:
         print(f"Trick starting with : {starting_player.name}")
         starting_player_idx = self.players.index(starting_player)
-        cards_played = list[Tuple[Player,Card]]()
+        cards_played = list[Card]()
+        player_order = list[Player]()
 
         for i in range(len(self.players)):
             player = self.players[(starting_player_idx + i) % len(self.players)]
+            player_order.append(player)
             #change lead card to first card played
             if i == 0:
                 card_played = player.play_card(lead_card=None)
@@ -62,16 +57,17 @@ class ClubsEngine:
                 card_played = player.play_card(lead_card=self.lead_card)
             
             print(f"{player.name} played {card_played}")
-            cards_played.append((player, card_played))
+            cards_played.append(card_played)
 
             # notify all agents of a move 
             for notified_player in self.players:
                 notified_player.observeActionTaken(player, card_played)
         # find winner of trick
-        winner = self.find_winner(cards_played, trump=self.trump)
-        print(f"Winner of trick: {winner.name}\n")
-        self.player_scores[self.players.index(winner)] += 1
-        return winner
+        winnerIdx = self.find_winner(cards_played, trump=self.trump)
+
+        print(f"Winner of trick: {player_order[winnerIdx].name}\n")
+        self.player_scores[self.players.index(player_order[winnerIdx])] += 1
+        return player_order[winnerIdx]
 
     # TODO: this function sucks make it better, less confusing, and more efficient
     def find_winner(self, cards_played: list[Card], trump: Optional[Suit]) -> int:
@@ -81,7 +77,6 @@ class ClubsEngine:
         :param trump: trump suit
         :return: index of the winner
         """
-        card_values = [card.number for card in cards_played]
         cards_hierarchy = list[Card]()
         opposite_color_suit = Suit
         if trump is not None:
@@ -95,7 +90,7 @@ class ClubsEngine:
         if trump is not None:
             for card in cards_played:
                 if card.suit == trump or (card.suit == opposite_color_suit and card.number == 11):
-                    if highest_card.suit != trump and (highest_card.suit != opposite_color_suit and highest_card.number != 11):
+                    if highest_card.suit != trump and not(highest_card.suit == opposite_color_suit and highest_card.number == 11):
                         highest_card = card
                     elif cards_hierarchy.index(card) < cards_hierarchy.index(highest_card):
                         highest_card = card
@@ -110,6 +105,7 @@ class ClubsEngine:
         for i in range(len(self.players)):
             player = self.players[(dealerIdx + i + 1 ) % len(self.players)]
             print(player.name + " bid")
+            #TODO: implement player bidding
             bid = int(input())
             if bid < 0 or bid > 5:
                 raise Exception("Invalid bid")
@@ -177,7 +173,7 @@ class ClubsEngine:
             print("")
 
 if __name__ == "__main__":
-    deck = Deck([1,9,10,11,12,13])
+    deck = Deck([14,9,10,11,12,13])
     num_players = 4
     game = ClubsEngine(num_players, deck, 5, True)
     game.play()
