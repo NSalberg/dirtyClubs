@@ -1,5 +1,6 @@
 from random import shuffle
 from enum import Enum
+from typing import Optional
 
 class Suit(Enum):
     HEARTS = 1
@@ -14,6 +15,18 @@ class Suit(Enum):
         return self.value
     def __str__(self) -> str:
         return self.name.lower()
+    
+    def opposite_suit_same_color(self) -> 'Suit': # type: ignore
+        if self == Suit.HEARTS:
+            return Suit.DIAMONDS
+        if self == Suit.DIAMONDS:
+            return Suit.HEARTS
+        if self == Suit.SPADES:
+            return Suit.CLUBS
+        if self == Suit.CLUBS:
+            return Suit.SPADES
+
+    
 class Card:
     def __init__(self, suit: Suit, number: int) -> None:
         self.suit = suit
@@ -23,9 +36,11 @@ class Card:
         if isinstance(card, Card):
             return self.number == card.number and self.suit == card.suit
         return False
-    
+            
     def __str__(self) -> str:
         if self.number == 1:
+            num = "Ace"
+        elif self.number == 14:
             num = "Ace"
         elif self.number == 11:
             num = "Jack"
@@ -61,6 +76,10 @@ class Deck:
 
     def shuffle(self) -> None:
         shuffle(self.cards)
+    
+    def remove_card(self, card) -> Card:
+        self.cards.remove(card)
+        return card
 
 
 if __name__ == "__main__":
