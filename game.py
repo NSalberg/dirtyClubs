@@ -1,5 +1,4 @@
-from typing import Optional
-from typing import Tuple
+from typing import Optional, Union, Tuple, Type
 from cards import Deck, Suit, Card
 from players import Player, Player_Random
 from utils import block_print
@@ -69,25 +68,41 @@ class ClubsEngine:
             for notified_player in self.players:
                 notified_player.observeActionTaken(player, card_played)
         # find winner of trick
-        winner = self.find_winner(cards_played)
+        winner = self.find_winner(cards_played, trump=self.trump)
         print(f"Winner of trick: {winner.name}\n")
         self.player_scores[self.players.index(winner)] += 1
         return winner
 
-    # TODO: fully implement 
-    def find_winner(self, cards_played: list[Tuple[Player,Card]]) -> Player:
-        # find highest card of lead suit or trump
-        
-        highest_card = cards_played[0][1]
-        lead = highest_card.suit
-        winner = cards_played[0][0]
-        for player, card in cards_played:
-            if card.suit == lead:
-                if card.number > highest_card.number:
-                    highest_card = card
-                    winner = player
-        return winner
+    # TODO: this function sucks make it better, less confusing, and more efficient
+    def find_winner(self, cards_played: list[Card], trump: Optional[Suit]) -> int:
+        """
+        find_winner finds the winner of a trick and returns the index of the winner
+        :param cards_played: list of cards played in the trick
+        :param trump: trump suit
+        :return: index of the winner
+        """
+        card_values = [card.number for card in cards_played]
+        cards_hierarchy = list[Card]()
+        opposite_color_suit = Suit
+        if trump is not None:
+            cards_hierarchy = self.generateTrumpHierarchy(trump)
+            opposite_color_suit = trump.opposite_suit_same_color()
 
+
+        highest_card = cards_played[0]
+        lead_suit = cards_played[0].suit
+        
+        if trump is not None:
+            for card in cards_played:
+                if card.suit == trump or (card.suit == opposite_color_suit and card.number == 11):
+                    if highest_card.suit != trump and (highest_card.suit != opposite_color_suit and highest_card.number != 11):
+                        highest_card = card
+                    elif cards_hierarchy.index(card) < cards_hierarchy.index(highest_card):
+                        highest_card = card
+                elif card.suit == lead_suit and (highest_card.suit != trump and (highest_card.suit != opposite_color_suit and highest_card.number != 11) ):
+                    if card.number > highest_card.number:
+                        highest_card = card
+        return cards_played.index(highest_card)
     def getHighestBidder(self, dealerIdx: int) -> Tuple[int, Optional[Player]]:
         #loop through players starting with left of dealer
         highestBid = 0
@@ -107,6 +122,24 @@ class ClubsEngine:
                 break
         return highestBid, highestBidder
 
+    # generate card hierarchy
+    def generateTrumpHierarchy(self,  trump: Suit) -> list[Card]:
+        hierarchy = list[Card]()
+        hierarchy.append(Card(trump, 11))
+        hierarchy.append(Card(trump.opposite_suit_same_color(), 11))
+        hierarchy.append(Card(trump, 14))
+        hierarchy.append(Card(trump, 13))
+        hierarchy.append(Card(trump, 12))
+        hierarchy.append(Card(trump, 10))
+        hierarchy.append(Card(trump, 9))
+        return hierarchy
+    """
+    def generateHierarchy(self, deck: Deck, lead: Suit, isTrump: bool) -> list[Card]:
+        deck = copy.deepcopy(deck)
+        for card in deck.cards:
+            if card.suit == lead:
+                card.number += 13
+    """
 
     def passOrPlay(self, highestBidderIndex):
         for i in range(len(self.players) -1 ):
@@ -134,7 +167,7 @@ class ClubsEngine:
             for _ in range(self.dealAmount):
                 hand.append(self.deck.draw())
             self.players.append(Player_Random("Player " + str(i+1), hand))
-        self.showPlayersCards()
+        #self.showPlayersCards()
 
     def showPlayersCards(self) -> None:
         for player in self.players:
