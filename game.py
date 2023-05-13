@@ -39,7 +39,6 @@ class ClubsEngine:
         return self.player_scores
             
 
-    # TODO: implement trump suit 
     def trick(self, starting_player: Player) -> Player:
         print(f"Trick starting with : {starting_player.name}")
         starting_player_idx = self.players.index(starting_player)
@@ -51,10 +50,10 @@ class ClubsEngine:
             player_order.append(player)
             #change lead card to first card played
             if i == 0:
-                card_played = player.play_card(lead_card=None)
+                card_played = player.play_card(lead_card=None, trump_suit=self.trump)
                 self.lead_card = card_played
             else:
-                card_played = player.play_card(lead_card=self.lead_card)
+                card_played = player.play_card(lead_card=self.lead_card, trump_suit=self.trump)
             
             print(f"{player.name} played {card_played}")
             cards_played.append(card_played)
@@ -163,7 +162,7 @@ class ClubsEngine:
             for _ in range(self.dealAmount):
                 hand.append(self.deck.draw())
             self.players.append(Player_Random("Player " + str(i+1), hand))
-        #self.showPlayersCards()
+        self.showPlayersCards()
 
     def showPlayersCards(self) -> None:
         for player in self.players:

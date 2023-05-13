@@ -21,13 +21,13 @@ class Player(ABC):
     @return: card that was played
     """
     @abstractmethod
-    def play_card(self, lead_card: Optional[Card]) -> Card:
+    def play_card(self, lead_card: Optional[Card], trump_suit: Suit) -> Card:
         """
         play_card is called by the game engine to get the card that the player wants to play
         
         :param lead_card: card that was played first if it is the first card in the trick lead_card is None
         """
-        self.find_playable(lead_card)
+        self.find_playable(lead_card, trump_suit)
         played_card = random.choice(self.hand_playable)
         self.hand.remove(played_card)
         return played_card
@@ -114,13 +114,13 @@ class Player_Random(Player):
         for card in hand:
             self.card_map[card.suit].append(card)    
     
-    def play_card(self, lead_card: Optional[Card]) -> Card:
+    def play_card(self, lead_card: Optional[Card], trump_suit: Suit) -> Card:
         """
         play_card plays a random card from the hand_playable
         
         lead_card: card that was played first if it is the first card in the trick lead_card is None
         """
-        self.find_playable(lead_card)
+        self.find_playable(lead_card, trump_suit)
         played_card = random.choice(self.hand_playable)
         self.hand.remove(played_card)
         return played_card
@@ -148,13 +148,13 @@ class Player_MDP(Player):
         for card in hand:
             self.card_map[card.suit].append(card)    
     
-    def play_card(self, lead_card: Optional[Card]) -> Card:
+    def play_card(self, lead_card: Optional[Card], trump_suit: Suit) -> Card:
         """
         play_card plays a card from the hand_playable
         
         lead_card: card that was played first if it is the first card in the trick lead_card is None
         """
-        self.find_playable(lead_card)
+        self.find_playable(lead_card, trump_suit)
         played_card = random.choice(self.hand_playable)
         self.hand.remove(played_card)
 
